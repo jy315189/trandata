@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <title>Instascan</title>
+    <meta charset="UTF-8">
+    <script src="jquery-3.6.0.min.js"></script>
+    <script src="html5-qrcode.min.js"></script>
+    <style>
+        /* 设置整个页面的背景色和字体 */
+        body {
+          background-color: #f2f2f2;
+          font-family: Arial, sans-serif;
+        }
+        
+        /* 设置扫描器区域的样式 */
+        #reader {
+          width: 45%;
+          height: 45%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: rgba(0, 0, 0, 0.5);
+          position: relative;
+        }
+        
+        /* 设置文本区域的样式 */
+        #result {
+            width: 45%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            /* overflow: auto; */
+            word-break: break-all;
+        }
+        #result2 {
+          width: 45%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: white;
+          padding: 20px;
+          box-sizing: border-box;
+          /* overflow: auto; */
+          word-break: break-all;
+      }
+
+        
+        /* 设置按钮的样式 */
+        button {
+          font-size: 24px;
+          padding: 10px 20px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          margin: 20px;
+        }
+        
+        /* 将按钮水平居中 */
+        .btn-center {
+          display: flex;
+          justify-content: center;
+        }
+        
+        /* 将按钮垂直居中 */
+        .btn-middle {
+          display: flex;
+          align-items: center;
+        }
+        
+        /* 将按钮组定位在页面底部 */
+        .btn-group {
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px 0;
+        }
+        
+        /* 将 #reader 和文本区域放置在同一行 */
+        .container {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          align-items: center;
+        }
+      </style>
+  </head>
+  <body>
+       <div class="container">
+      <div id="reader"></div>
+      <div id="result"></div>
+      <div id="result2"></div>
+    </div>
+    <canvas id="canva" style="display:none"></canvas>
+    
+    <!-- 设置按钮组的样式 -->
+    <div class="btn-group">
+      <div class="btn-center btn-middle">
+        <button onclick="startCameraAndScan()" type="button">开始摄像并扫描</button>
+        <button onclick="pauseCamera()" type="button">暂停摄像</button>
+        <button onclick="startCamera()" type="button">继续摄像</button>
+        <button onclick="stopCamera()" type="button">关闭摄像头</button>
+        <button onclick="pauseScan()" type="button">暂停扫描</button>
+        <button onclick="resumeScan()" type="button">继续扫描</button>
+        <button onclick="takePhoto()" type="button">拍照</button>
+        <button onclick="window.location.reload()" type="button">刷新</button>
+      </div>
+    </div>
+  </body>
+<script>
+    var html5QrcodeScanner = new Html5Qrcode("reader");
+    function startCameraAndScan(){
+        $("#canva").css("display","none");
+        html5QrcodeScanner.start(
+            {facingMode:"environment"}//environment:后摄像头；user:前摄像头
+            ,{ fps: 10, qrbox:{width:500,height:500}},onScanSuccess);
+    }
+    function onScanSuccess(decodedText, decodedResult) {
+        pauseScan(); // 停止解析
+        pauseCamera(); // 暂停摄像
+        var resultElement = document.getElementById("result");
+        resultElement.innerHTML = decodedText; // 将解码后的文本添加到文本框中
+        var resultElement2 = document.getElementById("result2");
+        resultElement2.innerHTML = decodedText; // 将解码后的文本添加到文本框中
+        console.log(`Scan result: ${decodedText}`, decodedResult);
+      }
+    //暂停扫描解析二维码
+    function pauseScan() {
+        html5QrcodeScanner.pause();
+    }
+    //继续扫描解析二维码
+    function resumeScan(){
+        html5QrcodeScanner.resume();
+    }
+    //关闭摄像头
+    function stopCamera(){
+        html5QrcodeScanner.stop();
+    }
+    //暂停摄像
+    function pauseCamera(){
+        document.querySelector("video").pause();//停止扫描
+    }
+    //继续摄像
+    function startCamera(){
+        document.querySelector("video").play();
+    }
+    //拍照
+    function takePhoto(){
+        var video = document.querySelector("video");
+        var reader = $("#reader");
+        var canva = document.getElementById("canva");
+        canva.setAttribute("width",reader.css("width"));
+        canva.setAttribute("height",reader.css("height"));
+        canva.getContext("2d").drawImage(video,0,0,$(video).width(),$(video).height());
+        stopCamera();//停止摄像
+        $(canva).css("display","");
+       // var data = canva.toDataURL();//图形转成base64
+    }
+
+</script>
+</html>
+
